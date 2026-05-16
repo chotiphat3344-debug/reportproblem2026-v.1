@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบแจ้งปัญหาในการใช้งานระบบ</title>
+    <style>
+        /* พื้นหลังทั้งหมดของหน้าเว็บภายนอกเป็นสีขาว ตัวหนังสือดำ */
+        body {
+            background-color: #ffffff; 
+            color: #000000;
+            font-family: Sarabun;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* จัดหน้าเว็บและเนื้อหาทั้งหมดให้อยู่กึ่งกลางแนวนอน */
+            justify-content: flex-start; /* ดันเนื้อหาขึ้นไปชิดด้านบน */
+            min-height: 100vh;
+        }
+
+        /* ตัวครอบหลัก จัดความกว้างและระยะห่างด้านบน */
+        .wrapper {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px; /* เว้นระยะห่างจากขอบบนสุดของหน้าจอเล็กน้อย */
+            padding: 0 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        /* พื้นที่สี่เหลี่ยมที่มีข้อความ ให้ด้านหลังเป็นสีเนื้อ และลบเส้นกรอบสีดำออกแล้ว */
+        .content-box {
+            width: 100%;
+            background-color: #f5ebd8; /* พื้นหลังด้านหลังข้อความเป็นสีเนื้ออ่อน */
+            padding: 25px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* จัดสิ่งต่าง ๆ ภายในกรอบสี่เหลี่ยมให้อยู่กึ่งกลาง */
+            text-align: center; /* จัดตัวอักษรให้อยู่กึ่งกลาง */
+        }
+
+        /* ส่วนล่าง (Footer) ที่ปรับมาให้ต่อติดกับพื้นที่ด้านบน และลบเส้นกรอบออกแล้ว */
+        .footer-box {
+            width: 100%;
+            background-color: #ffffff; /* พื้นหลังส่วนล่างเป็นสีขาว */
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* แถบส่วนท้ายสีน้ำเงินเฉพาะหน้าแรก */
+        .credit-bar {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 10px;
+            font-weight: bold;
+            display: none; 
+        }
+
+        /* แถบแสดงวันเวลาปัจจุบัน */
+        .time-bar {
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        /* ปุ่มสีน้ำเงิน มีความโค้งมน */
+        button {
+            background-color: #0056b3; 
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            border-radius: 20px; /* ปุ่มมีความโค้งมน */
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004085;
+        }
+
+        /* ช่องสำหรับกรอกข้อมูล */
+        input[type="text"], input[type="password"] {
+            padding: 6px; 
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+        }
+
+        /* ซ่อนหน้าต่างที่ยังไม่ได้ใช้ */
+        .page { display: none; width: 100%; }
+        .active { display: block; }
+        
+        /* สไตล์ตารางหลัก (ชั้นที่ 1) */
+        table {
+            width: 100%;
+            border: 1px solid black;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: #ffffff;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* สไตล์ตารางซ้อนด้านใน (ชั้นที่ 2) */
+        .inner-table {
+            width: 100%;
+            margin: 5px 0;
+            background-color: #fafafa;
+        }
+        .inner-table td {
+            border: 1px dashed #666;
+            font-size: 13px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        
+        <!-- ================= หน้า 1 : หน้าแรก / Login ================= -->
+        <div id="page-home" class="page active">
+            <div class="content-box">
+                <h2>ระบบแจ้งปัญหาในการใช้งานระบบ</h2>
+                <p>กรุณากรอกรหัสผ่านให้ถูกต้องแล้วเข้าแจ้งปัญหาที่พบ</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <label>password : </label>
+                    <input type="password" id="login-token" placeholder="รหัสผ่าน"> <br>
+                    <button onclick="goReport()">ล็อกอิน</button>
+                </div>
+                
+                <div>
+                    <button onclick="showSummary()">ดูข้อมูลที่พบแล้ว</button><br>
+                    <button onclick="switchPage('page-admin-login')">ตอบกลับ admin</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= หน้าใหม่ : หน้ากรอกรหัส Admin Login ================= -->
+        <div id="page-admin-login" class="page">
+            <div class="content-box">
+                <h2>เฉพาะเจ้าหน้าที่: กรุณากรอกรหัสผ่าน Admin</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <label>Admin Password : </label>
+                    <input type="password" id="admin-password-input" placeholder="กรอกรหัสผ่านเพื่อเข้าสู่ระบบ">
+                    <button onclick="checkAdminLogin()">เข้าระบบ</button>
+                </div>
+                
+                <button onclick="goHome()" style="background-color: #555;">กลับหน้าแรก</button>
+            </div>
+        </div>
+
+        <!-- ================= หน้า 2 : หน้าแจ้งปัญหา 5 ข้อ ================= -->
+        <div id="page-report" class="page">
+            <div class="content-box">
+                <h2>กรอกปัญหาที่พบในการใช้งานระบบ</h2>
+                
+                <div style="width: 100%; max-width: 500px; text-align: left; margin-bottom: 15px;">
+                    1. <input type="text" id="prob1" style="width:90%; margin-bottom: 10px;"><br>
+                    2. <input type="text" id="prob2" style="width:90%; margin-bottom: 10px;"><br>
+                    3. <input type="text" id="prob3" style="width:90%; margin-bottom: 10px;"><br>
+                    4. <input type="text" id="prob4" style="width:90%; margin-bottom: 10px;"><br>
+                    5. <input type="text" id="prob5" style="width:90%; margin-bottom: 10px;">
+                </div>
+
+                <div>
+                    <button onclick="saveProblems()">บันทึกข้อมูล</button>
+                    <button onclick="goHome()" style="background-color: #555;">กลับหน้าแรก</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= หน้า 3 : หน้าตารางตอบกลับสำหรับ Admin ================= -->
+        <div id="page-admin-dashboard" class="page">
+            <div class="content-box">
+                <h2>ตอบกลับปัญหา (Admin)</h2>
+                
+                <table id="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ปัญหาที่ผู้ใช้แจ้งมา</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-tbody">
+                        <!-- ข้อมูลจะถูกดึงมาแสดงที่นี่ -->
+                    </tbody>
+                </table>
+                
+                <br>
+                <div id="reply-box" style="display:none; border: 1px solid black; padding: 10px; background-color: #fff; width: 100%;">
+                    <p><strong>กำลังตอบปัญหา: </strong> <span id="reply-target-text"></span></p>
+                    พิมพ์คำตอบ: <input type="text" id="admin-reply-input" style="width:60%; padding:4px;">
+                    <button onclick="submitReply()">บันทึกคำตอบ</button>
+                </div>
+
+                <br>
+                <button onclick="goHome()" style="background-color: #555;">ออกจากระบบ Admin / กลับหน้าแรก</button>
+            </div>
+        </div>
+
+        <!-- ================= หน้า 4 : หน้าตารางสรุปการพิมพ์และการตอบกลับ (ตารางสองชั้น) ================= -->
+        <div id="page-summary" class="page">
+            <div class="content-box">
+                <h2>ตารางสรุปข้อมูลปัญหาและการตอบกลับ</h2>
+                
+                <!-- ตารางชั้นที่ 1 -->
+                <table id="summary-table">
+                    <thead>
+                        <tr>
+                            <th>ข้อมูลปัญหาและคำตอบ</th>
+                            <th>รายละเอียดเวลา</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summary-tbody">
+                        <!-- ข้อมูลจะถูกดึงมาแสดงที่นี่ -->
+                    </tbody>
+                </table>
+
+                <br>
+                <button onclick="goHome()" style="background-color: #555;">กลับหน้าแรก</button>
+            </div>
+        </div>
+
+        <!-- ================= ส่วนล่างที่ย้ายมาต่อติดกับกล่องด้านบนทันที ================= -->
+                <p>code program : โชติพัฒน์ V.3.0.0    เริ่มใช้งาน 17/5/69</p
+    <!-- ================= ส่วนของระบบ (Javascript) ================= -->
+    <script>
+        // จำลองฐานข้อมูลภายในโปรแกรม
+        let problemsDatabase = [];
+        let runningId = 1;
+        let currentProblemIdToReply = null;
+
+        // ฟังก์ชันอัปเดตเวลาปัจจุบันในทุกหน้า
+        function updateTime() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('current-time-display').innerText = now.toLocaleDateString('th-TH', options);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // ควบคุมเครดิตบาร์สีน้ำเงินเฉพาะหน้าแรก
+        function toggleCredit(pageId) {
+            if(pageId === 'page-home') {
+                document.getElementById('credit-section').style.display = 'block';
+            } else {
+                document.getElementById('credit-section').style.display = 'none';
+            }
+        }
+        toggleCredit('page-home');
+
+        // ฟังก์ชันสำหรับควบคุมการสลับเปลี่ยนหน้าจอ
+        function switchPage(pageId) {
+            let pages = document.getElementsByClassName('page');
+            for(let i = 0; i < pages.length; i++) {
+                pages[i].classList.remove('active');
+            }
+            document.getElementById(pageId).classList.add('active');
+            toggleCredit(pageId);
+        }
+
+        function goHome() { 
+            document.getElementById('admin-password-input').value = "";
+            switchPage('page-home'); 
+        }
+
+        function goReport() {
+            let token = document.getElementById('login-token').value;
+            if(token.trim() !== "") {
+                switchPage('page-report');
+                document.getElementById('login-token').value = "";
+            } else {
+                alert("กรุณากรอก password ก่อนครับ");
+            }
+        }
+
+        function checkAdminLogin() {
+            let adminPass = document.getElementById('admin-password-input').value;
+            if(adminPass === "666555") {
+                renderAdminTable();
+                document.getElementById('reply-box').style.display = 'none';
+                switchPage('page-admin-dashboard');
+            } else {
+                alert("รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง");
+            }
+        }
+
+        function saveProblems() {
+            let count = 0;
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('th-TH') + " " + now.toLocaleDateString('th-TH');
+
+            for(let i=1; i<=5; i++) {
+                let inputVal = document.getElementById('prob'+i).value.trim();
+                if(inputVal !== "") {
+                    problemsDatabase.push({
+                        id: runningId++,
+                        problemText: inputVal,
+                        replyText: "",
+                        isReplied: false,
+                        reportTime: timeString,
+                        replyTime: "-"
+                    });
+                    count++;
+                }
+                document.getElementById('prob'+i).value = "";
+            }
+            
+            if(count > 0) {
+                alert("บันทึกปัญหาสำเร็จแล้ว!");
+                goHome();
+            } else {
+                alert("คุณยังไม่ได้กรอกปัญหาเลย");
+            }
+        }
+
+        function renderAdminTable() {
+            let tbody = document.getElementById('admin-tbody');
+            tbody.innerHTML = "";
+            let pendingProblems = problemsDatabase.filter(p => p.isReplied === false);
+            
+            if(pendingProblems.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>ไม่มีปัญหาใหม่ที่รอการตอบกลับ</td></tr>";
+                return;
+            }
+
+            pendingProblems.forEach(p => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.problemText}</td>
+                    <td><button onclick="openReplyBox(${p.id})">เลือกตอบปัญหานี้</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openReplyBox(id) {
+            currentProblemIdToReply = id;
+            let targetProblem = problemsDatabase.find(p => p.id === id);
+            document.getElementById('reply-target-text').innerText = targetProblem.problemText;
+            document.getElementById('admin-reply-input').value = "";
+            document.getElementById('reply-box').style.display = 'block';
+        }
+
+        function submitReply() {
+            let replyText = document.getElementById('admin-reply-input').value.trim();
+            if(replyText === "") {
+                alert("กรุณาพิมพ์คำตอบก่อนบันทึก");
+                return;
+            }
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('th-TH') + " " + now.toLocaleDateString('th-TH');
+
+            let targetProblem = problemsDatabase.find(p => p.id === currentProblemIdToReply);
+            if(targetProblem) {
+                targetProblem.replyText = replyText;
+                targetProblem.isReplied = true;
+                targetProblem.replyTime = timeString;
+            }
+
+            alert("บันทึกคำตอบสำเร็จ);
+            document.getElementById('reply-box').style.display = 'none';
+            renderAdminTable();
+        }
+
+        // แสดงตารางสรุปสองชั้น (Nested Table)
+        function showSummary() {
+            let tbody = document.getElementById('summary-tbody');
+            tbody.innerHTML = "";
+            
+            if(problemsDatabase.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>ยังไม่มีข้อมูลในระบบ</td></tr>";
+            } else {
+                problemsDatabase.forEach(p => {
+                    let tr = document.createElement('tr');
+                    let statusText = p.isReplied ? `<span style="color:blue; font-weight:bold;">คำตอบ: ${p.replyText}</span>` : "<i style='color:gray;'>ยังรอการตอบกลับ</i>";
+                    
+                    tr.innerHTML = `
+                        <td>
+                            <strong>ปัญหาที่แจ้ง:</strong> ${p.problemText}<br><br>
+                            <strong>สถานะ:</strong> ${statusText}
+                        </td>
+                        <td>
+                            <!-- ตารางชั้นใน (ตารางชั้นที่ 2) -->
+                            <table class="inner-table">
+                                <tr>
+                                    <td>เวลาที่แจ้งปัญหา:</td>
+                                    <td>${p.reportTime}</td>
+                                </tr>
+                                <tr>
+                                    <td>เวลาที่ตอบกลับ:</td>
+                                    <td>${p.replyTime}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            switchPage('page-summary');
+        }
+    </script>
+</body>
+</html>
